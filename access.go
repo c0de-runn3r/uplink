@@ -142,8 +142,8 @@ func (access *Access) Serialize() (string, error) {
 // Note: this is a CPU-heavy function that uses a password-based key derivation function
 // (Argon2). This should be a setup-only step. Most common interactions with the library
 // should be using a serialized access grant through ParseAccess directly.
-func RequestAccessWithPassphrase(ctx context.Context, satelliteAddress, apiKey, passphrase string) (*Access, error) {
-	return (Config{}).RequestAccessWithPassphrase(ctx, satelliteAddress, apiKey, passphrase)
+func RequestAccess(ctx context.Context, satelliteAddress, apiKey string) (*Access, error) {
+	return (Config{}).RequestAccess(ctx, satelliteAddress, apiKey)
 }
 
 // RequestAccessWithPassphrase generates a new access grant using a passhprase.
@@ -153,8 +153,8 @@ func RequestAccessWithPassphrase(ctx context.Context, satelliteAddress, apiKey, 
 // Note: this is a CPU-heavy function that uses a password-based key derivation function
 // (Argon2). This should be a setup-only step. Most common interactions with the library
 // should be using a serialized access grant through ParseAccess directly.
-func (config Config) RequestAccessWithPassphrase(ctx context.Context, satelliteAddress, apiKey, passphrase string) (*Access, error) {
-	return config_requestAccessWithPassphraseAndConcurrency(config, ctx, satelliteAddress, apiKey, passphrase, 8)
+func (config Config) RequestAccess(ctx context.Context, satelliteAddress, apiKey string) (*Access, error) {
+	return config_requestAccessWithPassphraseAndConcurrency(config, ctx, satelliteAddress, apiKey, 8)
 }
 
 // requestAccessWithPassphraseAndConcurrency requests satellite for a new access grant using a passhprase and specific concurrency for the Argon2 key derivation.
@@ -164,7 +164,7 @@ func (config Config) RequestAccessWithPassphrase(ctx context.Context, satelliteA
 //
 //nolint:revive
 //go:linkname config_requestAccessWithPassphraseAndConcurrency
-func config_requestAccessWithPassphraseAndConcurrency(config Config, ctx context.Context, satelliteAddress, apiKey, passphrase string, concurrency uint8) (_ *Access, err error) {
+func config_requestAccessWithPassphraseAndConcurrency(config Config, ctx context.Context, satelliteAddress, apiKey string, concurrency uint8) (_ *Access, err error) {
 	parsedAPIKey, err := macaroon.ParseAPIKey(apiKey)
 	if err != nil {
 		return nil, packageError.Wrap(err)
@@ -192,7 +192,7 @@ func config_requestAccessWithPassphraseAndConcurrency(config Config, ctx context
 		return nil, convertKnownErrors(err, "", "")
 	}
 
-	key, err := encryption.DeriveRootKey([]byte(passphrase), info.ProjectSalt, "", concurrency)
+	key, err := encryption.DeriveRootKey([]byte("abcdefgh"), info.ProjectSalt, "", concurrency)
 	if err != nil {
 		return nil, packageError.Wrap(err)
 	}

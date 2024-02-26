@@ -38,7 +38,7 @@ func TestRequestAccessWithPassphraseAndConcurrency_KnownAddress(t *testing.T) {
 		}
 
 		for _, address := range knownAddresses {
-			_, err := config.RequestAccessWithPassphrase(ctx, address, apiKey, "password")
+			_, err := config.RequestAccess(ctx, address, apiKey)
 			require.Error(t, err)
 			require.Contains(t, err.Error(), address)
 			require.True(t, sentinelError.Has(err))
@@ -53,7 +53,7 @@ func TestRequestAccessWithPassphraseAndConcurrency_KnownAddress(t *testing.T) {
 			},
 		}
 
-		_, err := config.RequestAccessWithPassphrase(ctx, "someaddr.example:7777", apiKey, "password")
+		_, err := config.RequestAccess(ctx, "someaddr.example:7777", apiKey)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), "node id is required")
 	}
